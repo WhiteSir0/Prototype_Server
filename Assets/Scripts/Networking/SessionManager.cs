@@ -15,6 +15,7 @@ public class SessionManager : MonoBehaviour
     public Button joinButton;
     public GameObject menuPanel;
     public Text statusText;
+    public Text roomCodeText;
 
     private ISession session;
 
@@ -23,7 +24,9 @@ public class SessionManager : MonoBehaviour
         hostButton.onClick.AddListener(HostGame);
         joinButton.onClick.AddListener(JoinGame);
 
-        await UnityServices.InitializeAsync();
+        var initOptions = new InitializationOptions();
+        initOptions.SetProfile(Guid.NewGuid().ToString("N").Substring(0, 30));
+        await UnityServices.InitializeAsync(initOptions);
         if (!AuthenticationService.Instance.IsSignedIn)
         {
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
@@ -49,6 +52,7 @@ public class SessionManager : MonoBehaviour
             var options = new SessionOptions { MaxPlayers = 2 }.WithRelayNetwork();
             session = await MultiplayerService.Instance.CreateSessionAsync(options);
             joinCodeDisplayText.text = session.Code;
+            roomCodeText.text = $"Code: {session.Code}";
         }
         catch (Exception e)
         {
@@ -63,6 +67,7 @@ public class SessionManager : MonoBehaviour
         {
             session = await MultiplayerService.Instance.JoinSessionByCodeAsync(joinCodeInputField.text);
             joinCodeDisplayText.text = session.Code;
+            roomCodeText.text = $"Code: {session.Code}";
         }
         catch (Exception e)
         {
