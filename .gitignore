@@ -35,3 +35,7 @@ crashlytics-build.properties
 *.meta.bak
 
 /docs/superpowers/
+
+/Assets/Art/Mushrooms/
+/Assets/Art/Mushrooms.meta
+
