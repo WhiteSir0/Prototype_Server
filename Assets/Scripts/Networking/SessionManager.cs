@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Multiplayer;
@@ -12,6 +13,8 @@ public class SessionManager : MonoBehaviour
     public Text errorText;
     public Button hostButton;
     public Button joinButton;
+    public GameObject menuPanel;
+    public Text statusText;
 
     private ISession session;
 
@@ -25,6 +28,17 @@ public class SessionManager : MonoBehaviour
         {
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
+    }
+
+    private void Start()
+    {
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+    }
+
+    private void OnClientConnected(ulong clientId)
+    {
+        menuPanel.SetActive(false);
+        statusText.text += $"Player {clientId} entered\n";
     }
 
     public async void HostGame()
