@@ -36,42 +36,76 @@ public class SessionManager : MonoBehaviour
     private void Start()
     {
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.Singleton.OnTransportFailure += OnTransportFailure;
     }
 
     private void OnClientConnected(ulong clientId)
     {
         menuPanel.SetActive(false);
+        errorText.text = string.Empty;
         statusText.text += $"Player {clientId} entered\n";
+    }
+
+    private void OnTransportFailure()
+    {
+        menuPanel.SetActive(true);
+        SetButtonsInteractable(true);
+        joinCodeDisplayText.text = "-";
+        roomCodeText.text = string.Empty;
+        statusText.text = string.Empty;
+        ShowError("Connection lost, please try again");
+    }
+
+    private void SetButtonsInteractable(bool interactable)
+    {
+        hostButton.interactable = interactable;
+        joinButton.interactable = interactable;
+    }
+
+    private void ShowConnecting()
+    {
+        SetButtonsInteractable(false);
+        errorText.color = Color.white;
+        errorText.text = "Connecting...";
+    }
+
+    private void ShowError(string message)
+    {
+        errorText.color = Color.red;
+        errorText.text = message;
+        SetButtonsInteractable(true);
     }
 
     public async void HostGame()
     {
-        errorText.text = string.Empty;
+        ShowConnecting();
         try
         {
             var options = new SessionOptions { MaxPlayers = 2 }.WithRelayNetwork();
             session = await MultiplayerService.Instance.CreateSessionAsync(options);
             joinCodeDisplayText.text = session.Code;
             roomCodeText.text = $"Code: {session.Code}";
+            errorText.text = string.Empty;
         }
         catch (Exception e)
         {
-            errorText.text = e.Message;
+            ShowError(e.Message);
         }
     }
 
     public async void JoinGame()
     {
-        errorText.text = string.Empty;
+        ShowConnecting();
         try
         {
             session = await MultiplayerService.Instance.JoinSessionByCodeAsync(joinCodeInputField.text);
             joinCodeDisplayText.text = session.Code;
             roomCodeText.text = $"Code: {session.Code}";
+            errorText.text = string.Empty;
         }
         catch (Exception e)
         {
-            errorText.text = e.Message;
+            ShowError(e.Message);
         }
     }
 }
